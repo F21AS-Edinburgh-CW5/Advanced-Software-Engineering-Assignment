@@ -8,7 +8,7 @@ import javax.swing.SwingUtilities;
 
 public class App {
     public static void main(String[] args) {
-        // 临时 demo service（下一步我们会创建这个类）
+        // Temporary demo service
         CoffeeShopService service = new DemoCoffeeShopService();
 
         SwingUtilities.invokeLater(() -> {
