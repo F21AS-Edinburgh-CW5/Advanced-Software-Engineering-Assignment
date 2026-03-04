@@ -20,7 +20,7 @@ public class DemoCoffeeShopService implements CoffeeShopService {
 
     @Override
     public Bill calculateBill(List<String> selectedItemIds) {
-        // demo: 简单把选中的 items 价格加起来
+        // Demo: Simply add up the prices of the selected items
         List<MenuItemView> menu = getMenuItems();
 
         double subtotal = 0.0;
@@ -36,7 +36,7 @@ public class DemoCoffeeShopService implements CoffeeShopService {
             }
         }
 
-        // demo discount：满10减2（你截图里刚好是这个效果）
+        // Demo discount: 2  off for every 10  spent.
         double discount = subtotal >= 10.0 ? 2.0 : 0.0;
         double total = subtotal - discount;
         String rule = discount > 0 ? "Demo Discount" : "No Discount";
@@ -46,7 +46,7 @@ public class DemoCoffeeShopService implements CoffeeShopService {
 
     @Override
     public void generateReport() {
-        // 输出到项目根目录下的 reports/report.txt
+       // Output to the "reports/report.txt" file in the project's root directory
         java.nio.file.Path dir = java.nio.file.Paths.get("reports");
         java.nio.file.Path file = dir.resolve("report.txt");
 
@@ -78,7 +78,7 @@ public class DemoCoffeeShopService implements CoffeeShopService {
             System.out.println("[REPORT] Written to: " + file.toAbsolutePath());
 
         } catch (Exception e) {
-            // 不要让程序退出失败：report 写不了就给提示
+            
             System.err.println("[REPORT] Failed to write report: " + e.getMessage());
         }
     }
