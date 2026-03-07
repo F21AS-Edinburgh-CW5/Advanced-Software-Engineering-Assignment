@@ -1,1 +1,21 @@
-
+BEV-001,Espresso,2.50,Beverage
+BEV-002,Americano,3.00,Beverage
+BEV-003,Cappuccino,3.50,Beverage
+BEV-004,Latte,3.80,Beverage
+BEV-005,Mocha,4.20,Beverage
+BEV-006,Flat White,3.60,Beverage
+BEV-007,Hot Chocolate,3.80,Beverage
+BEV-008,Green Tea,2.80,Beverage
+FOOD-001,Croissant,2.50,Food
+FOOD-002,Blueberry Muffin,3.00,Food
+FOOD-003,Chocolate Brownie,3.50,Food
+FOOD-004,Ham Sandwich,4.50,Food
+FOOD-005,Chicken Wrap,5.00,Food
+FOOD-006,Caesar Salad,5.50,Food
+FOOD-007,Scone with Jam,2.80,Food
+OTH-001,Bottle of Water,1.50,Other
+OTH-002,Orange Juice,2.80,Other
+OTH-003,Cookie,1.80,Other
+OTH-004,Fruit Salad,3.50,Other
+OTH-005,Yogurt Parfait,4.00,Other
+BADID-1,Invalid ID Test,1.00,Other
