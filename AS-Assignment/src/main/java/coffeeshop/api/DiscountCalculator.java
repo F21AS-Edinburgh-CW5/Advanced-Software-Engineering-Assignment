@@ -2,7 +2,7 @@ import java.util.List;
 
 public class DiscountCalculator {
 
-    // 新增：用于同时返回折扣金额和规则名称的包装类，完美适配成员B的 Bill 类
+    // Packaging class used to simultaneously return discount amount and rule name, perfectly adapted to Bill class of other members
     public static class DiscountResult {
         private final double discountAmount;
         private final String ruleApplied;
@@ -16,7 +16,6 @@ public class DiscountCalculator {
         public String getRuleApplied() { return ruleApplied; }
     }
 
-    // 参数从 Order 改为 List<MenuItemView>
     public DiscountResult calculateDiscount(List<MenuItemView> items) {
         if (items == null || items.isEmpty()) {
             return new DiscountResult(0.0, "No discount");
@@ -28,7 +27,7 @@ public class DiscountCalculator {
 
         for (MenuItemView item : items) {
             total += item.getPrice();
-            // 匹配成员B的 category 属性
+            // Match the category attribute of other members
             if (item.getCategory().equalsIgnoreCase("beverage")) {
                 beverageCount++;
             } else if (item.getCategory().equalsIgnoreCase("food")) {
@@ -36,21 +35,22 @@ public class DiscountCalculator {
             }
         }
 
-        // 规则1：1杯饮品 + 2份食物 = 20%
+        // Rule 1:1 cup of beverage+2 portions of food=20%
         if (beverageCount >= 1 && foodCount >= 2) {
             return new DiscountResult(total * 0.20, "20% off: 1 Bev + 2 Food");
         }
 
-        // 规则2：3杯及以上饮品 = 15%
+        // Rule 2: 3 or more drinks=15%
         if (beverageCount >= 3) {
             return new DiscountResult(total * 0.15, "15% off: 3+ Beverages");
         }
 
-        // 规则3：总价大于 £25 = 10%
+        // Rule 3: Total price greater than £ 25=10%
         if (total > 25.0) {
             return new DiscountResult(total * 0.10, "10% off: Over £25");
         }
 
         return new DiscountResult(0.0, "No discount");
     }
+
 }
