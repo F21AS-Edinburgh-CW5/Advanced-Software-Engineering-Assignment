@@ -1,6 +1,6 @@
 
 
-import coffeeshop.exception.InvalidItemIdException;
+import coffeeshop.api.InvalidItemIdException;
 import coffeeshop.api.MenuItemView;  // 现有API视图类
 
 /**
@@ -125,4 +125,5 @@ public class MenuItem {
             this.price
         );
     }
+
 }
