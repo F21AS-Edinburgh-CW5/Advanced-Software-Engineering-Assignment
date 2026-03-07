@@ -1,12 +1,17 @@
-
+package coffeeshop.api;
 
 /**
-*The checked exception thrown when the format of the menu item ID does not comply with the rules.
-*Rule: The ID must conform to the format of "<CATEGORY>- XXX", where CATEGORY is a predefined enumeration value,
-*XXX is a three digit number (allowing leading zeros).
-*/
+ * Checked exception thrown when a menu item ID does not satisfy
+ * the required format rule.
+ *
+ * Expected format:
+ * <CATEGORY>-XXX
+ * where CATEGORY is an alphabetic prefix and XXX is a three-digit number.
+ */
 public class InvalidItemIdException extends Exception {
-    
+
+    private static final long serialVersionUID = 1L;
+
     public InvalidItemIdException(String message) {
         super(message);
     }
@@ -14,5 +19,4 @@ public class InvalidItemIdException extends Exception {
     public InvalidItemIdException(String message, Throwable cause) {
         super(message, cause);
     }
-
 }
