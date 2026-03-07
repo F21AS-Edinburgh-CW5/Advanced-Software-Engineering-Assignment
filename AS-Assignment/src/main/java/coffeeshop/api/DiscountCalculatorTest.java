@@ -8,12 +8,12 @@ public class DiscountCalculatorTest {
 
     @Test
     public void testRule1_20PercentDiscount() {
-        // 使用成员B的 MenuItemView (id, description, category, price)
+        // Using other members' MenuItemView (id, description, category, price)
         List<MenuItemView> items = Arrays.asList(
                 new MenuItemView("BEV-001", "Latte", "beverage", 5.0),
                 new MenuItemView("FOD-001", "Sandwich", "food", 10.0),
                 new MenuItemView("FOD-002", "Cake", "food", 10.0)
-        ); // 总价 £25
+        ); // Totol £25
 
         DiscountCalculator calculator = new DiscountCalculator();
         DiscountCalculator.DiscountResult result = calculator.calculateDiscount(items);
@@ -28,7 +28,7 @@ public class DiscountCalculatorTest {
                 new MenuItemView("BEV-001", "Tea", "beverage", 4.0),
                 new MenuItemView("BEV-002", "Coffee", "beverage", 4.0),
                 new MenuItemView("BEV-003", "Juice", "beverage", 4.0)
-        ); // 总价 £12
+        ); // Totol £12
 
         DiscountCalculator calculator = new DiscountCalculator();
         DiscountCalculator.DiscountResult result = calculator.calculateDiscount(items);
@@ -72,4 +72,5 @@ public class DiscountCalculatorTest {
 
         assertEquals(0.0, result.getDiscountAmount(), 0.01);
     }
+
 }
