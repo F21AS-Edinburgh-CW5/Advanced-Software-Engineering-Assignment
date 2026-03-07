@@ -1,56 +1,127 @@
+package coffeeshop.api;
+
+import coffeeshop.api.MenuItemView;
+
 import java.util.List;
 
 public class DiscountCalculator {
 
-    // Packaging class used to simultaneously return discount amount and rule name, perfectly adapted to Bill class of other members
+    private static final double RULE_1_RATE = 0.20; // 1 beverage + 2 food
+    private static final double RULE_2_RATE = 0.15; // 3+ beverages
+    private static final double RULE_3_RATE = 0.10; // subtotal > 25
+
     public static class DiscountResult {
         private final double discountAmount;
         private final String ruleApplied;
 
         public DiscountResult(double discountAmount, String ruleApplied) {
-            this.discountAmount = discountAmount;
-            this.ruleApplied = ruleApplied;
+            if (discountAmount < 0) {
+                throw new IllegalArgumentException("Discount amount cannot be negative.");
+            }
+            this.discountAmount = roundToTwoDecimals(discountAmount);
+            this.ruleApplied = (ruleApplied == null || ruleApplied.isBlank())
+                    ? "No discount"
+                    : ruleApplied;
         }
 
-        public double getDiscountAmount() { return discountAmount; }
-        public String getRuleApplied() { return ruleApplied; }
+        public double getDiscountAmount() {
+            return discountAmount;
+        }
+
+        public String getRuleApplied() {
+            return ruleApplied;
+        }
     }
 
     public DiscountResult calculateDiscount(List<MenuItemView> items) {
         if (items == null || items.isEmpty()) {
-            return new DiscountResult(0.0, "No discount");
+            return noDiscount();
         }
 
         int beverageCount = 0;
         int foodCount = 0;
-        double total = 0.0;
+        double subtotal = 0.0;
 
         for (MenuItemView item : items) {
-            total += item.getPrice();
-            // Match the category attribute of other members
-            if (item.getCategory().equalsIgnoreCase("beverage")) {
+            if (item == null) {
+                continue; // ignore null entries safely
+            }
+
+            double price = item.getPrice();
+            if (price < 0) {
+                throw new IllegalArgumentException(
+                        "Item price cannot be negative: " + item.getId()
+                );
+            }
+
+            subtotal += price;
+
+            if (isBeverage(item)) {
                 beverageCount++;
-            } else if (item.getCategory().equalsIgnoreCase("food")) {
+            }
+            if (isFood(item)) {
                 foodCount++;
             }
         }
 
-        // Rule 1:1 cup of beverage+2 portions of food=20%
+        subtotal = roundToTwoDecimals(subtotal);
+
+        // Priority: Rule 1 > Rule 2 > Rule 3
         if (beverageCount >= 1 && foodCount >= 2) {
-            return new DiscountResult(total * 0.20, "20% off: 1 Bev + 2 Food");
+            return new DiscountResult(
+                    subtotal * RULE_1_RATE,
+                    "20% off: 1 beverage + 2 food items"
+            );
         }
 
-        // Rule 2: 3 or more drinks=15%
         if (beverageCount >= 3) {
-            return new DiscountResult(total * 0.15, "15% off: 3+ Beverages");
+            return new DiscountResult(
+                    subtotal * RULE_2_RATE,
+                    "15% off: 3 or more beverages"
+            );
         }
 
-        // Rule 3: Total price greater than £ 25=10%
-        if (total > 25.0) {
-            return new DiscountResult(total * 0.10, "10% off: Over £25");
+        if (subtotal > 25.0) {
+            return new DiscountResult(
+                    subtotal * RULE_3_RATE,
+                    "10% off: subtotal over £25"
+            );
         }
 
+        return noDiscount();
+    }
+
+    private boolean isBeverage(MenuItemView item) {
+        String category = normalize(item.getCategory());
+        String id = normalize(item.getId());
+
+        return category.equals("beverage")
+                || category.equals("bev")
+                || category.equals("drink")
+                || category.equals("drinks")
+                || id.startsWith("bev-")
+                || id.startsWith("drink-");
+    }
+
+    private boolean isFood(MenuItemView item) {
+        String category = normalize(item.getCategory());
+        String id = normalize(item.getId());
+
+        return category.equals("food")
+                || category.equals("foods")
+                || id.startsWith("fod-")
+                || id.startsWith("food-");
+    }
+
+    private DiscountResult noDiscount() {
         return new DiscountResult(0.0, "No discount");
     }
 
+    private String normalize(String value) {
+        return value == null ? "" : value.trim().toLowerCase();
+    }
+
+    private static double roundToTwoDecimals(double value) {
+        return Math.round(value * 100.0) / 100.0;
+    }
 }
