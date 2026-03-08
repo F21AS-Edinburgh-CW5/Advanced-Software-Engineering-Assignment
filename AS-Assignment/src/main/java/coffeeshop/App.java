@@ -8,8 +8,8 @@ import javax.swing.SwingUtilities;
 
 public class App {
     public static void main(String[] args) {
-        String menuFile = "AS-Assignment/data/menu.csv";
-        String ordersFile = "AS-Assignment/data/orders.csv";
+        String menuFile = "data/menu.csv";
+        String ordersFile = "data/orders.csv";
 
         if (args.length >= 2) {
             menuFile = args[0];
