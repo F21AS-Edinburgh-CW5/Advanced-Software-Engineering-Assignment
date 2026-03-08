@@ -6,6 +6,8 @@ import coffeeshop.api.CoffeeShopService;
 import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Font;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.List;
 
 public class MainFrame extends JFrame {
@@ -17,12 +19,18 @@ public class MainFrame extends JFrame {
     public MainFrame(CoffeeShopService service) {
         this.service = service;
 
-
-
         setTitle("Coffee Shop Ordering System");
         setSize(600, 400);
-        setLocationRelativeTo(null); // 居中
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        // Use DO_NOTHING so we can generate report before closing
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                onExit();
+            }
+        });
 
         initUI();
     }
@@ -38,6 +46,7 @@ public class MainFrame extends JFrame {
         centerPanel = new JPanel();
         centerPanel.setLayout(new BorderLayout());
         add(centerPanel, BorderLayout.CENTER);
+
         // ===== Menu list (multi-select) =====
         DefaultListModel<MenuItemView> listModel = new DefaultListModel<>();
         for (MenuItemView item : service.getMenuItems()) {
@@ -52,7 +61,7 @@ public class MainFrame extends JFrame {
 
         JPanel buttonPanel = new JPanel();
         JButton generateButton = new JButton("Generate Bill");
-        JButton exitButton = new JButton("Exit");
+        JButton exitButton = new JButton("Exit & Generate Report");
         generateButton.addActionListener(e -> onGenerateBill());
         exitButton.addActionListener(e -> onExit());
 
@@ -61,6 +70,7 @@ public class MainFrame extends JFrame {
 
         add(buttonPanel, BorderLayout.SOUTH);
     }
+
     private void onGenerateBill() {
 
         List<MenuItemView> selected = menuList.getSelectedValuesList();
@@ -82,15 +92,20 @@ public class MainFrame extends JFrame {
         // call service
         coffeeshop.api.Bill bill = service.calculateBill(selectedIds);
 
-        // display bill (simple dialog)
-        String message =
-                "Subtotal: £" + bill.getSubtotal() + "\n" +
-                        "Discount: £" + bill.getDiscount() + "\n" +
-                        "Total: £" + bill.getTotal() + "\n\n" +
-                        "Rule: " + bill.getDiscountRuleApplied();
+        // display bill with item details
+        StringBuilder message = new StringBuilder();
+        message.append("Items:\n");
+        for (coffeeshop.api.Bill.LineItem li : bill.getItems()) {
+            message.append(String.format("  %s - %s  £%.2f\n",
+                    li.getId(), li.getDescription(), li.getPrice()));
+        }
+        message.append(String.format("\nSubtotal: £%.2f\n", bill.getSubtotal()));
+        message.append(String.format("Discount: £%.2f\n", bill.getDiscount()));
+        message.append(String.format("Total:    £%.2f\n\n", bill.getTotal()));
+        message.append("Rule: ").append(bill.getDiscountRuleApplied());
 
         JOptionPane.showMessageDialog(this,
-                message,
+                message.toString(),
                 "Bill",
                 JOptionPane.INFORMATION_MESSAGE);
     }
@@ -99,7 +114,13 @@ public class MainFrame extends JFrame {
         // trigger report generation
         service.generateReport();
 
-        // close window
+        JOptionPane.showMessageDialog(this,
+                "Report generated. See reports/report.txt",
+                "Report",
+                JOptionPane.INFORMATION_MESSAGE);
+
+        // close and exit
         dispose();
+        System.exit(0);
     }
 }
