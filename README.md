@@ -161,7 +161,7 @@ If you encounter errors after importing, try the following:
 
 | Problem | Solution |
 |---------|----------|
-| `Error! Cannot read file: data/menu.csv` | The working directory may not be correct. In Eclipse: **Run → Run Configurations → Arguments tab** → set Working Directory to `${workspace_loc}/[project-name]/AS-Assignment` |
-| `coffeeshop.api cannot be resolved` | Go to **Properties → Java Build Path → Source tab**. Remove any extra source folders such as `coffeeshop/api` or `coffeeshop/data_loader/src`. Keep only `AS-Assignment/src/main/java` and `AS-Assignment/src/test/java`. Also check that `coffeeshop/api/` is not listed under Excluded patterns |
-| `BeforeEach cannot be resolved` / `Test cannot be resolved` | Go to **Properties → Java Build Path → Libraries tab** → click Classpath → **Add Library → JUnit → JUnit 5** → Finish |
-| 100+ errors on import | If two copies of the project are open in Eclipse, right-click the unused one → **Close Project** |
+| `Error! Cannot read file: data/menu.csv` | This happens when Eclipse's working directory does not match the location of the `data/` folder. The CSV path in `App.java` is `data/menu.csv`, which is relative to the working directory. Depending on how the project was imported, the working directory may be either `AS-Assignment/` or the parent folder. **Fix option 1:** In Eclipse, go to **Run → Run Configurations → Arguments tab** → set Working Directory to `${workspace_loc}/[project-name]/AS-Assignment`. **Fix option 2:** If the project root is the outer folder, change the paths in `App.java` from `data/menu.csv` to `AS-Assignment/data/menu.csv` and from `data/orders.csv` to `AS-Assignment/data/orders.csv`. |
+| `coffeeshop.api cannot be resolved` | Go to **Properties → Java Build Path → Source tab**. Remove any extra source folders such as `coffeeshop/api` or `coffeeshop/data_loader/src`. Keep only `AS-Assignment/src/main/java` and `AS-Assignment/src/test/java`. Also check that `coffeeshop/api/` is not listed under Excluded patterns. |
+| `BeforeEach cannot be resolved` / `Test cannot be resolved` | Go to **Properties → Java Build Path → Libraries tab** → click Classpath → **Add Library → JUnit → JUnit 5** → Finish. |
+| 100+ errors on import | If two copies of the project are open in Eclipse, right-click the unused one → **Close Project**. |
