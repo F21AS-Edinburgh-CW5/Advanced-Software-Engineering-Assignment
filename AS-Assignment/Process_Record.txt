@@ -1,0 +1,15 @@
+Task:
+Complete the implementation of SharedOrderQueue, making it the fundamental data structure for order sharing and delivery in the system.
+
+Design decisions:
+- Choose LinkedList<CustomerOrder> as the underlying container. The reason is that we can call its methods to add elements from the end of the queue and remove elements from the head of the queue.
+- Use the synchronized keyword. Reason: This approach ensures thread safety.
+- Thread coordination. Utilize wait() and notifyAll() to achieve coordination between threads, referring to the "one producer, multiple consumers" model.
+
+Key behaviour:
+- add(order): Adds a new order and notifies all worker threads that may be in a waiting state.
+- take(): Accept orders. When the queue is empty and new orders may still be received, the thread enters a waiting state. If the queue is empty and the producer has already finished, it returns null and signals that end the consumer thread.
+- markProducerDone(): Called by the producer to inform the system that no new orders will be generated subsequently.
+
+Reasoning:
+Tierization1 is in its foundational phase, where the basic structure and logic will be implemented first.
