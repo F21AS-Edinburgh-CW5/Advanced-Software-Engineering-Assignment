@@ -12,4 +12,4 @@ Key behaviour:
 - markProducerDone(): Called by the producer to inform the system that no new orders will be generated subsequently.
 
 Reasoning:
-Tierization1 is in its foundational phase, where the basic structure and logic will be implemented first.
+Iteration1 is in its foundational phase, where the basic structure and logic will be implemented first.
