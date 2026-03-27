@@ -12,7 +12,7 @@ import coffeeshop.model.StaffStatus;
  *
  * @author Lin Yi (Member D)
  */
-public class ServingStaffWorker implements Runnable {
+public class ServingStaffWorker extends Thread {
 
     private final ServingStaff staff;
     private final SharedOrderQueue queue;
