@@ -32,7 +32,8 @@ public class ProducerThread extends Thread {
     @Override
     public void run() {
         // 1. 读取订单原始记录（使用 load 方法，不是 loadOrders）
-        List<OrderRecord> records = OrderLoader.load(ordersFilePath);
+        OrderLoader loader = new OrderLoader();
+        List<OrderRecord> records = loader.load(ordersFilePath);
         if (records == null || records.isEmpty()) {
             System.out.println("[PRODUCER] No orders found in file.");
             queue.markProducerDone();
