@@ -1,4 +1,4 @@
-package coffeeshop
+package coffeeshop;
 
 import coffeeshop.loader.MenuLoader;
 import coffeeshop.model.MenuItem;
