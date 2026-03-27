@@ -28,7 +28,7 @@ public class SimulationManager {
             String staffId = "Server-" + (i + 1);
             ServingStaff staffModel = new ServingStaff(staffId);
             staffModels.add(staffModel);
-            ServingStaffWorker worker = new ServingStaffWorker(queue, staffModel);
+            ServingStaffWorker worker = new ServingStaffWorker(staffModel, queue);
             workers.add(worker);
         }
     }
