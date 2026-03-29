@@ -37,8 +37,14 @@ public class App {
         SharedOrderQueue queue = new SharedOrderQueue();
         ProducerThread producer = new ProducerThread(queue, menuMap, ordersFile, 2000);
         SimulationService simulationService = new SimulationService(staffList);
-        SimulationManager manager = new SimulationManager(queue, producer, 2);
+        //used to connect queue with service of the simulation.
+        queue.setSimulationService(simulationService);
 
+        //use GUI,worker threads
+         SimulationManager manager =
+                new SimulationManager(queue, producer, staffList, simulationService);
+
+        
         // Launch GUI
         SwingUtilities.invokeLater(() -> {
             MainFrame frame = new MainFrame(simulationService, manager);
