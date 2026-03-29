@@ -2,6 +2,7 @@ package coffeeshop.report;
 
 import coffeeshop.api.MenuItemView;
 import coffeeshop.model.OrderRecord;
+import coffeeshop.model.ServingStaff;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -119,5 +120,57 @@ public class ReportGenerator {
         PrintWriter writer = new PrintWriter(new FileWriter(filePath));
         writer.print(generateReport());
         writer.close();
+    }
+    // ===== Stage 2 additions =====
+
+    private List<ServingStaff> staffList;
+
+    public void setStaffList(List<ServingStaff> staffList) {
+        this.staffList = staffList;
+    }
+
+    public String generateStaffReport() {
+        if (staffList == null || staffList.isEmpty()) {
+            return "No staff data available.\n";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("=============================================================\n");
+        sb.append("              SERVING STAFF REPORT\n");
+        sb.append("=============================================================\n\n");
+        sb.append(String.format("%-12s %18s %20s\n", "Staff ID", "Orders Processed", "Total Time (s)"));
+        sb.append(String.format("%-12s %18s %20s\n", "--------", "----------------", "--------------"));
+
+        int totalOrders = 0;
+        long totalTime = 0;
+
+        for (ServingStaff staff : staffList) {
+            long seconds = staff.getTotalProcessingTimeMs() / 1000;
+            sb.append(String.format("%-12s %18d %19ds\n",
+                    staff.getStaffId(),
+                    staff.getProcessedCount(),
+                    seconds));
+            totalOrders += staff.getProcessedCount();
+            totalTime += staff.getTotalProcessingTimeMs();
+        }
+
+        sb.append("\n");
+        sb.append("Total orders processed: " + totalOrders + "\n");
+        sb.append(String.format("Total processing time:  %ds\n", totalTime / 1000));
+        sb.append("\n=============================================================\n");
+        sb.append("                    END OF STAFF REPORT\n");
+        sb.append("=============================================================\n");
+
+        return sb.toString();
+    }
+
+    public void printStaffReportToConsole() {
+        System.out.println(generateStaffReport());
+    }
+
+    public void writeStaffReportToFile(String filePath) throws IOException {
+        try (PrintWriter writer = new PrintWriter(new FileWriter(filePath, true))) {
+            writer.print(generateStaffReport());
+        }
     }
 }

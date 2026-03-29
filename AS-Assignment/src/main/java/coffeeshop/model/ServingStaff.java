@@ -6,6 +6,7 @@ public class ServingStaff {
     private int processedCount;
     private StaffStatus status;
     private CustomerOrder currentOrder;
+    private long totalProcessingTimeMs;
 
     public ServingStaff(String staffId) {
         if (staffId == null || staffId.trim().isEmpty()) {
@@ -15,6 +16,14 @@ public class ServingStaff {
         this.status = StaffStatus.IDLE;
         this.processedCount = 0;
         this.currentOrder = null;
+    }
+
+    public void addProcessingTime(long ms) {
+        this.totalProcessingTimeMs += ms;
+    }
+
+    public long getTotalProcessingTimeMs() {
+        return totalProcessingTimeMs;
     }
 
     public String getStaffId() {

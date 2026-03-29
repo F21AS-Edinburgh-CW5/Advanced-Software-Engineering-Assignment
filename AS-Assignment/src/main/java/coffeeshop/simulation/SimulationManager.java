@@ -3,6 +3,7 @@ package coffeeshop.simulation;
 import coffeeshop.model.ServingStaff;
 import coffeeshop.model.StaffStatus;
 import coffeeshop.report.ReportGenerator;
+import coffeeshop.logging.EventLogger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,8 +66,17 @@ public class SimulationManager {
         System.out.println("Total orders processed: " + staffModels.stream()
                 .mapToInt(ServingStaff::getProcessedCount).sum());
         for (ServingStaff staff : staffModels) {
-            System.out.println(staff.getStaffId() + " processed " + staff.getProcessedCount() + " orders.");
+            System.out.println(staff.getStaffId() + " processed "
+                    + staff.getProcessedCount() + " orders, total time: "
+                    + staff.getTotalProcessingTimeMs() / 1000 + "s");
         }
         System.out.println("=============================\n");
+
+        // 写入EventLogger日志文件
+        try {
+            EventLogger.getInstance().writeToFile("simulation_log.txt");
+        } catch (Exception e) {
+            System.out.println("[Manager] Failed to write log: " + e.getMessage());
+        }
     }
 }

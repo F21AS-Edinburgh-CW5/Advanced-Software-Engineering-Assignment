@@ -1,5 +1,110 @@
 package coffeeshop.gui;
 
+import coffeeshop.logging.EventLogger;
+import coffeeshop.model.SimulationSnapshot;
+import coffeeshop.service.QueueObserver;
+import coffeeshop.service.ServerObserver;
+import coffeeshop.service.SimulationService;
+import coffeeshop.simulation.SimulationManager;
+
+import javax.swing.*;
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
+
+/**
+ * Main simulation window for Stage 2.
+ * Layout: QueuePanel (left) + StaffPanel (right) + ControlPanel (bottom).
+ * Implements QueueObserver and ServerObserver to receive simulation updates.
+ *
+ * Stage 1 ordering GUI has been superseded by the Stage 2 simulation GUI.
+ */
+public class MainFrame extends JFrame implements QueueObserver, ServerObserver {
+
+    private final SimulationService simulationService;
+    private final ControlPanel controlPanel;
+
+    // TODO: Replace with QueuePanel when Member B completes it
+    private final JPanel queuePanel;
+
+    // TODO: Replace with StaffPanel when Member C completes it
+    private final StaffPanel staffPanel;
+
+    public MainFrame(SimulationService simulationService, SimulationManager simulationManager) {
+        this.simulationService = simulationService;
+
+        setTitle("Coffee Shop Simulation");
+        setSize(900, 600);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                onExit();
+            }
+        });
+
+        queuePanel = new JPanel();
+        queuePanel.setBorder(BorderFactory.createTitledBorder("Queue (pending)"));
+
+        staffPanel = new StaffPanel();
+
+        controlPanel = new ControlPanel();
+
+        initUI();
+        SimulationController controller = new SimulationController(simulationManager, simulationService);
+        controller.registerObservers(this, staffPanel);
+        controlPanel.setStartAction(controller::start);
+
+
+    }
+
+    private void initUI() {
+        setLayout(new BorderLayout());
+
+        JPanel centerPanel = new JPanel(new GridLayout(1, 2));
+        centerPanel.add(queuePanel);
+        centerPanel.add(staffPanel);
+
+        add(centerPanel, BorderLayout.CENTER);
+        add(controlPanel, BorderLayout.SOUTH);
+    }
+
+    @Override
+    public void onQueueChanged(SimulationSnapshot snapshot) {
+        SwingUtilities.invokeLater(() -> {
+            // TODO: delegate to QueuePanel when ready
+            queuePanel.removeAll();
+            queuePanel.revalidate();
+            queuePanel.repaint();
+        });
+    }
+
+    @Override
+    public void onServerStateChanged(SimulationSnapshot snapshot) {
+        SwingUtilities.invokeLater(() -> {
+            // TODO: delegate to StaffPanel when ready
+            staffPanel.removeAll();
+            staffPanel.revalidate();
+            staffPanel.repaint();
+        });
+    }
+
+    private void onExit() {
+        try {
+            EventLogger.getInstance().writeToFile("simulation_log.txt");
+        } catch (Exception ex) {
+            System.out.println("[MainFrame] Failed to write log: " + ex.getMessage());
+        }
+        dispose();
+        System.exit(0);
+    }
+}
+
+
+/*
+package coffeeshop.gui;
+
 import coffeeshop.api.MenuItemView;
 import coffeeshop.api.CoffeeShopService;
 
@@ -124,3 +229,4 @@ public class MainFrame extends JFrame {
         System.exit(0);
     }
 }
+*/

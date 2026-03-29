@@ -62,6 +62,7 @@ public class ServingStaffWorker extends Thread {
 
             // Done
             staff.incrementProcessedCount();
+            staff.addProcessingTime(order.getProcessingTimeMs());
             staff.setCurrentOrder(null);
             staff.setStatus(StaffStatus.IDLE);
             logger.log(tag + " Finished order for " + order.getCustomerId());
