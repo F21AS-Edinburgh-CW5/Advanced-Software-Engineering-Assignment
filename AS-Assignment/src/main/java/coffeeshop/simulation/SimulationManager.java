@@ -34,6 +34,28 @@ public class SimulationManager {
         }
     }
 
+    //overwrite for iteration 2
+    public SimulationManager(SharedOrderQueue queue,
+                             ProducerThread producer,
+                             List<ServingStaff> staffModels,
+                             SimulationService simulationService) {
+        this.queue = queue;
+        this.producer = producer;
+        this.workers = new ArrayList<>();
+
+        if (staffModels == null) {
+            this.staffModels = new ArrayList<>();
+        } else {
+            this.staffModels = staffModels;
+        }
+
+        for (ServingStaff staffModel : this.staffModels) {
+            ServingStaffWorker worker =
+                    new ServingStaffWorker(staffModel, queue, simulationService);
+            workers.add(worker);
+        }
+    }
+
     public void startSimulation() {
         System.out.println("[Manager] Starting simulation...");
         producer.start();
