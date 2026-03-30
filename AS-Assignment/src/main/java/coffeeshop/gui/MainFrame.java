@@ -23,10 +23,10 @@ public class MainFrame extends JFrame implements QueueObserver, ServerObserver {
     private final SimulationService simulationService;
     private final ControlPanel controlPanel;
 
-    // TODO: Replace with QueuePanel when Member B completes it
-    private final JPanel queuePanel;
 
-    // TODO: Replace with StaffPanel when Member C completes it
+    private final QueuePanel queuePanel;
+
+
     private final StaffPanel staffPanel;
 
     public MainFrame(SimulationService simulationService, SimulationManager simulationManager) {
@@ -44,8 +44,7 @@ public class MainFrame extends JFrame implements QueueObserver, ServerObserver {
             }
         });
 
-        queuePanel = new JPanel();
-        queuePanel.setBorder(BorderFactory.createTitledBorder("Queue (pending)"));
+        queuePanel = new QueuePanel();
 
         staffPanel = new StaffPanel();
 
@@ -72,12 +71,7 @@ public class MainFrame extends JFrame implements QueueObserver, ServerObserver {
 
     @Override
     public void onQueueChanged(SimulationSnapshot snapshot) {
-        SwingUtilities.invokeLater(() -> {
-            // TODO: delegate to QueuePanel when ready
-            queuePanel.removeAll();
-            queuePanel.revalidate();
-            queuePanel.repaint();
-        });
+        queuePanel.onQueueChanged(snapshot);
     }
 
     @Override

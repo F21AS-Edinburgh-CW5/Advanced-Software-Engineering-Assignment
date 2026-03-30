@@ -4,6 +4,7 @@ import coffeeshop.model.ServingStaff;
 import coffeeshop.model.StaffStatus;
 import coffeeshop.report.ReportGenerator;
 import coffeeshop.logging.EventLogger;
+import coffeeshop.service.SimulationService;
 
 import java.util.ArrayList;
 import java.util.List;
