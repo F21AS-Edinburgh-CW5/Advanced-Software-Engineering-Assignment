@@ -76,12 +76,7 @@ public class MainFrame extends JFrame implements QueueObserver, ServerObserver {
 
     @Override
     public void onServerStateChanged(SimulationSnapshot snapshot) {
-        SwingUtilities.invokeLater(() -> {
-            // TODO: delegate to StaffPanel when ready
-            staffPanel.removeAll();
-            staffPanel.revalidate();
-            staffPanel.repaint();
-        });
+        staffPanel.onServerStateChanged(snapshot);
     }
 
     private void onExit() {
