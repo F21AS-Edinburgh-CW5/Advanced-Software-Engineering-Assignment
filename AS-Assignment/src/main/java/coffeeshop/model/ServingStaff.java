@@ -1,3 +1,4 @@
+//used for mutable model(one serving staff member)
 package coffeeshop.model;
 
 public class ServingStaff {
@@ -16,13 +17,14 @@ public class ServingStaff {
         this.status = StaffStatus.IDLE;
         this.processedCount = 0;
         this.currentOrder = null;
+        this.totalProcessingTimeMs = 0L;
     }
 
-    public void addProcessingTime(long ms) {
+    public synchronized void addProcessingTime(long ms) {
         this.totalProcessingTimeMs += ms;
     }
 
-    public long getTotalProcessingTimeMs() {
+    public synchronized long getTotalProcessingTimeMs() {
         return totalProcessingTimeMs;
     }
 
@@ -30,32 +32,45 @@ public class ServingStaff {
         return staffId;
     }
 
-    public StaffStatus getStatus() {
+    public synchronized StaffStatus getStatus() {
         return status;
     }
 
-    public void setStatus(StaffStatus status) {
+    public synchronized void setStatus(StaffStatus status) {
         this.status = status;
     }
 
-    public CustomerOrder getCurrentOrder() {
+    public synchronized CustomerOrder getCurrentOrder() {
         return currentOrder;
     }
 
-    public void setCurrentOrder(CustomerOrder currentOrder) {
+    public synchronized void setCurrentOrder(CustomerOrder currentOrder) {
         this.currentOrder = currentOrder;
     }
 
-    public int getProcessedCount() {
+    public synchronized int getProcessedCount() {
         return processedCount;
     }
 
-    public void incrementProcessedCount() {
+    public synchronized void incrementProcessedCount() {
         this.processedCount++;
     }
 
+    public synchronized boolean isIdle() {
+        return status == StaffStatus.IDLE;
+    }
+    
+    public synchronized ServingStaff copy() {
+        ServingStaff copy = new ServingStaff(staffId);
+        copy.processedCount = this.processedCount;
+        copy.status = this.status;
+        copy.currentOrder = this.currentOrder;
+        copy.totalProcessingTimeMs = this.totalProcessingTimeMs;
+        return copy;
+    }
+
     @Override
-    public String toString() {
+    public synchronized String toString() {
         return "ServingStaff{staffId='" + staffId + "', status=" + status
                 + ", processedCount=" + processedCount + "}";
     }
