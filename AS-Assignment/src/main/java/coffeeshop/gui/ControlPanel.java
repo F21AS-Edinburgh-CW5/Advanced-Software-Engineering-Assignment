@@ -1,30 +1,44 @@
 package coffeeshop.gui;
 
+import coffeeshop.simulation.SimulationConfig;
 import javax.swing.*;
 import java.awt.FlowLayout;
 
 /**
  * Bottom control panel containing simulation controls.
  * Start button triggers SimulationController.start().
- * Speed slider is reserved for Iteration 3.
+ * Speed slider is used to adjust simulation speed.
  */
 public class ControlPanel extends JPanel {
 
     private final JButton startButton;
     private final JButton addStaffButton;
     private final JButton removeStaffButton;
-    // Speed slider reserved for Iter 3
     private final JSlider speedSlider;
     private final JLabel statusLabel;
+
     public ControlPanel() {
         setLayout(new FlowLayout(FlowLayout.LEFT));
 
         startButton = new JButton("Start Simulation");
         addStaffButton = new JButton("Add Staff");
-        removeStaffButton = new JButton("Remove  Staff");
+        removeStaffButton = new JButton("Remove Staff");
+        
         speedSlider = new JSlider(1, 10, 5);
-        speedSlider.setEnabled(false); // disabled until Iter 3
-        speedSlider.setToolTipText("Simulation speed (coming in Iter 3)");
+        speedSlider.setMajorTickSpacing(3);
+        speedSlider.setPaintTicks(true);
+        speedSlider.setPaintLabels(true);
+        speedSlider.setToolTipText("Simulation speed: 0.25x - 4.0x");
+        speedSlider.setEnabled(true);
+        
+        speedSlider.addChangeListener(e -> {
+            if (!speedSlider.getValueIsAdjusting()) {
+                int val = speedSlider.getValue();
+                double speed = 0.25 + (val - 1) * (4.0 - 0.25) / 9.0;
+                SimulationConfig.setSpeedMultiplier(speed);
+            }
+        });
+        
         statusLabel = new JLabel("Information：OK！");
         add(startButton);
         add(addStaffButton);
@@ -34,14 +48,11 @@ public class ControlPanel extends JPanel {
         add(statusLabel);
     }
 
-    /**
-     * Registers a listener on the Start button.
-     * Called by SimulationController to connect the button to start().
-     */
     public void setStartAction(Runnable action) {
         startButton.addActionListener(e -> action.run());
     }
-   public void setAddStaffAction(Runnable action) {
+    
+    public void setAddStaffAction(Runnable action) {
         addStaffButton.addActionListener(e -> action.run());
     }
 
@@ -60,11 +71,12 @@ public class ControlPanel extends JPanel {
     public JSlider getSpeedSlider() {
         return speedSlider;
     }
+    
     public JButton getAddStaffButton() {
         return addStaffButton;
     }
+    
     public JButton getRemoveStaffButton() {
         return removeStaffButton;
     }
-
 }
