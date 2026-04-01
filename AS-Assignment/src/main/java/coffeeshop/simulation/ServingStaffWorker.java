@@ -5,13 +5,7 @@ import coffeeshop.model.CustomerOrder;
 import coffeeshop.model.ServingStaff;
 import coffeeshop.model.StaffStatus;
 import coffeeshop.service.SimulationService;
-/**
- * Consumer thread: takes orders from SharedOrderQueue and simulates processing.
- * Loop: WAITING → take() → PROCESSING → sleep → IDLE → repeat.
- * Returns when take() yields null (producer done + queue empty).
- *
- * @author Lin Yi (Member D)
- */
+
 public class ServingStaffWorker extends Thread {
 
     private final ServingStaff staff;
@@ -25,7 +19,7 @@ public class ServingStaffWorker extends Thread {
         this(staff, queue, null);
     }
     
-    public ServingStaffWorker(ServingStaff staff, SharedOrderQueue queue ,SimulationService simulationService) {
+    public ServingStaffWorker(ServingStaff staff, SharedOrderQueue queue, SimulationService simulationService) {
         if (staff == null) throw new IllegalArgumentException("staff must not be null");
         if (queue == null) throw new IllegalArgumentException("queue must not be null");
         this.staff = staff;
@@ -50,7 +44,6 @@ public class ServingStaffWorker extends Thread {
 
             CustomerOrder order = queue.take(this::isStopRequested);
 
-            // null means no more orders — exit cleanly
             if (order == null) {
                 if (shouldStop) {
                     stopCleanly(tag, "Removed from simulation.");
@@ -60,12 +53,11 @@ public class ServingStaffWorker extends Thread {
                             + staff.getProcessedCount());
                 }
                 return;
-                
             }
 
             if (shouldStop) {
                 queue.addToFront(order);
-                stopCleanly(tag, "Information : Has removed, can start a new order.");
+                stopCleanly(tag, "Information: Has removed, can start a new order.");
                 return;
             }
 
@@ -76,7 +68,9 @@ public class ServingStaffWorker extends Thread {
                     + " (" + order.getItems().size() + " item(s))");
 
             try {
-                Thread.sleep(order.getProcessingTimeMs());
+                long originalTime = order.getProcessingTimeMs();
+                long adjustedTime = (long)(originalTime / SimulationConfig.getSpeedMultiplier());
+                Thread.sleep(adjustedTime);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 updateState(StaffStatus.IDLE, null);
@@ -94,9 +88,9 @@ public class ServingStaffWorker extends Thread {
                 stopCleanly(tag, "Removed upon completion of the current order.");
                 return;
             }
-            
         }
     }
+    
     public void requestStop() {
         shouldStop = true;
     }
@@ -123,7 +117,6 @@ public class ServingStaffWorker extends Thread {
             simulationService.notifyServerObservers(queue.getQueueSnapshot());
         }
     }
-
 
     public ServingStaff getStaff() {
         return staff;
