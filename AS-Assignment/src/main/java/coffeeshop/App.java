@@ -37,14 +37,12 @@ public class App {
         SharedOrderQueue queue = new SharedOrderQueue();
         ProducerThread producer = new ProducerThread(queue, menuMap, ordersFile, 2000);
         SimulationService simulationService = new SimulationService(staffList);
-        //used to connect queue with service of the simulation.
         queue.setSimulationService(simulationService);
 
-        //use GUI,worker threads
-         SimulationManager manager =
-                new SimulationManager(queue, producer, staffList, simulationService);
+        // Pass menuMap to SimulationManager
+        SimulationManager manager =
+                new SimulationManager(queue, producer, staffList, simulationService, menuMap);
 
-        
         // Launch GUI
         SwingUtilities.invokeLater(() -> {
             MainFrame frame = new MainFrame(simulationService, manager);
@@ -52,32 +50,3 @@ public class App {
         });
     }
 }
-
-/*
-package coffeeshop;
-
-import coffeeshop.api.CoffeeShopService;
-import coffeeshop.gui.MainFrame;
-import coffeeshop.service.CoffeeShopServiceImpl;
-
-import javax.swing.SwingUtilities;
-
-public class App {
-    public static void main(String[] args) {
-        String menuFile = "AS-Assignment/data/menu.csv";
-        String ordersFile = "AS-Assignment/data/orders.csv";
-
-        if (args.length >= 2) {
-            menuFile = args[0];
-            ordersFile = args[1];
-        }
-
-        CoffeeShopService service = new CoffeeShopServiceImpl(menuFile, ordersFile);
-
-        SwingUtilities.invokeLater(() -> {
-            MainFrame frame = new MainFrame(service);
-            frame.setVisible(true);
-        });
-    }
-}
-*/
