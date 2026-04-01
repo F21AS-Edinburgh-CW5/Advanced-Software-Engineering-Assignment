@@ -1,5 +1,6 @@
 package coffeeshop.simulation;
 
+import coffeeshop.model.MenuItem;
 import coffeeshop.model.ServingStaff;
 import coffeeshop.model.StaffStatus;
 import coffeeshop.report.ReportGenerator;
@@ -8,50 +9,53 @@ import coffeeshop.service.SimulationService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-/**
- * 模拟管理器：启动所有线程，等待仿真结束，生成报告并清理日志。
- */
 public class SimulationManager {
     private final SharedOrderQueue queue;
     private final ProducerThread producer;
     private final List<ServingStaffWorker> workers;
-    private final List<ServingStaff> staffModels;   // 用于报告统计
+    private final List<ServingStaff> staffModels;
     private final List<ServingStaff> reportStaffModels;
     private final SimulationService simulationService;
+    private OnlineOrderProducerThread onlineProducer;  // 新增
 
     private final Object workerLock = new Object();
     private int nextStaffNumber;
     private volatile boolean simulationStarted;
     private volatile boolean simulationFinished;
     
+    // 控制台版本构造函数（不启用在线订单）
     public SimulationManager(SharedOrderQueue queue,
-                             ProducerThread producer,
-                             int workerCount) {
-        this.queue = queue;
-        this.producer = producer;
-        this.workers = new ArrayList<>();
-        this.staffModels = new ArrayList<>();
-        this.simulationService = null;
-        
-        for (int i = 0; i < workerCount; i++) {
-            String staffId = "Server-" + (i + 1);
-            ServingStaff staffModel = new ServingStaff(staffId);
-            staffModels.add(staffModel);
-            reportStaffModels.add(staffModel);
-            ServingStaffWorker worker = new ServingStaffWorker(staffModel, queue);
-            workers.add(worker);
-        }
-        this.nextStaffNumber = workerCount + 1;
-        this.simulationStarted = false;
-        this.simulationFinished = false;
-    }
+            ProducerThread producer,
+            int workerCount) {
+this.queue = queue;
+this.producer = producer;
+this.workers = new ArrayList<>();
+this.staffModels = new ArrayList<>();
+this.reportStaffModels = new ArrayList<>();   // 添加这一行，解决 final 未初始化错误
+this.simulationService = null;
 
-    //overwrite for iteration 2
+for (int i = 0; i < workerCount; i++) {
+String staffId = "Server-" + (i + 1);
+ServingStaff staffModel = new ServingStaff(staffId);
+staffModels.add(staffModel);
+reportStaffModels.add(staffModel);
+ServingStaffWorker worker = new ServingStaffWorker(staffModel, queue);
+workers.add(worker);
+}
+this.nextStaffNumber = workerCount + 1;
+this.simulationStarted = false;
+this.simulationFinished = false;
+this.onlineProducer = null;
+}
+
+    // GUI 版本构造函数（启用在线订单）
     public SimulationManager(SharedOrderQueue queue,
                              ProducerThread producer,
                              List<ServingStaff> staffModels,
-                             SimulationService simulationService) {
+                             SimulationService simulationService,
+                             Map<String, MenuItem> menuMap) {
         this.queue = queue;
         this.producer = producer;
         this.workers = new ArrayList<>();
@@ -71,10 +75,15 @@ public class SimulationManager {
                     new ServingStaffWorker(staffModel, queue, simulationService);
             workers.add(worker);
         }
+        
+        // 初始化在线订单生产者（文件路径可配置）
+        String onlineOrdersFile = "data/online_orders.csv";
+        long onlineInterval = 3000; // 3秒一个在线订单
+        this.onlineProducer = new OnlineOrderProducerThread(queue, menuMap, onlineOrdersFile, onlineInterval);
     }
 
     public void startSimulation() {
-         synchronized (workerLock) {
+        synchronized (workerLock) {
             if (simulationStarted) {
                 return;
             }
@@ -83,6 +92,9 @@ public class SimulationManager {
 
         System.out.println("[Manager] Starting simulation...");
         producer.start();
+        if (onlineProducer != null) {
+            onlineProducer.start();
+        }
 
         List<ServingStaffWorker> snapshot;
         synchronized (workerLock) {
@@ -96,18 +108,19 @@ public class SimulationManager {
     }
 
     public void awaitCompletion() throws InterruptedException {
-        // 等待生产者结束
         producer.join();
+        if (onlineProducer != null) {
+            onlineProducer.join();
+        }
         while (true) {
-        List<ServingStaffWorker> snapshot;
+            List<ServingStaffWorker> snapshot;
             synchronized (workerLock) {
                 snapshot = new ArrayList<>(workers);
             }
-        // 等待所有服务员线程结束
-        for (ServingStaffWorker worker : snapshot) {
-            worker.join();
-        }
-        synchronized (workerLock) {
+            for (ServingStaffWorker worker : snapshot) {
+                worker.join();
+            }
+            synchronized (workerLock) {
                 boolean allJoined = true;
                 for (ServingStaffWorker worker : workers) {
                     if (worker.isAlive()) {
@@ -128,11 +141,9 @@ public class SimulationManager {
             simulationService.notifyAllObservers(queue.getQueueSnapshot());
         }
         
-        // 生成报告（目前仅打印，可后续集成 ReportGenerator）
         generateSimpleReport();
-
-        // 注：日志写入由 EventLogger 负责，此处不处理
     }
+    
     public String addServingStaff() {
         ServingStaff newStaff;
         ServingStaffWorker newWorker;
@@ -163,6 +174,7 @@ public class SimulationManager {
         publishStaffChange();
         return newStaff.getStaffId();
     }
+    
     public String removeOneIdleStaff() {
         ServingStaffWorker candidate = null;
         String removedStaffId = null;
@@ -203,12 +215,13 @@ public class SimulationManager {
             removeStaffModelByIdLocked(removedStaffId);
         }
 
-        EventLogger.getInstance().log("Information:need to removal a staff member: " + removedStaffId);
+        EventLogger.getInstance().log("Information: need to removal a staff member: " + removedStaffId);
         queue.signalStateChange();
         publishStaffChange();
         cleanupWorkerWhenStopped(candidate);
         return removedStaffId;
     }
+    
     private void cleanupWorkerWhenStopped(ServingStaffWorker worker) {
         if (worker == null || !worker.isAlive()) {
             return;
@@ -228,6 +241,7 @@ public class SimulationManager {
         cleaner.setDaemon(true);
         cleaner.start();
     }
+    
     private int countActiveStaffLocked() {
         int count = 0;
         for (ServingStaffWorker worker : workers) {
@@ -237,6 +251,7 @@ public class SimulationManager {
         }
         return count;
     }
+    
     private void removeStaffModelByIdLocked(String staffId) {
         for (int i = 0; i < staffModels.size(); i++) {
             if (staffId.equals(staffModels.get(i).getStaffId())) {
@@ -245,11 +260,13 @@ public class SimulationManager {
             }
         }
     }
+    
     private void publishStaffChange() {
         if (simulationService != null) {
             simulationService.notifyServerObservers(queue.getQueueSnapshot());
         }
     }
+    
     private int determineNextStaffNumber(List<ServingStaff> initialStaff) {
         int maxNumber = 0;
         for (ServingStaff staff : initialStaff) {
@@ -268,9 +285,6 @@ public class SimulationManager {
         return maxNumber + 1;
     }
 
-    /**
-     * 简单报告（Iteration 1 控制台输出）
-     */
     private void generateSimpleReport() {
         System.out.println("\n===== SIMULATION REPORT =====");
         System.out.println("Total orders processed: " + staffModels.stream()
@@ -282,7 +296,6 @@ public class SimulationManager {
         }
         System.out.println("=============================\n");
 
-        // 写入EventLogger日志文件
         try {
             EventLogger.getInstance().writeToFile("simulation_log.txt");
         } catch (Exception e) {
