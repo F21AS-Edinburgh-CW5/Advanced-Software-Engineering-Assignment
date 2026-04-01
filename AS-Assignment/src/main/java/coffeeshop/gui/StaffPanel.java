@@ -136,7 +136,7 @@ public class StaffPanel extends JPanel implements ServerObserver {
             ));
             setPreferredSize(new Dimension(220, 300));
 
-            headerLabel = new JLabel("Server " + staffId);
+            headerLabel = new JLabel(staffId);
             headerLabel.setFont(TITLE_FONT);
             add(headerLabel, BorderLayout.NORTH);
 

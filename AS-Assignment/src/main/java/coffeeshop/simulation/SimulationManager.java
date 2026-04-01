@@ -69,6 +69,8 @@ this.onlineProducer = null;
             this.staffModels = staffModels;
         }
         this.reportStaffModels = new ArrayList<>(this.staffModels);
+
+        this.nextStaffNumber = determineNextStaffNumber(this.staffModels);
         
         for (ServingStaff staffModel : this.staffModels) {
             ServingStaffWorker worker =
@@ -77,7 +79,7 @@ this.onlineProducer = null;
         }
         
         // 初始化在线订单生产者（文件路径可配置）
-        String onlineOrdersFile = "data/online_orders.csv";
+        String onlineOrdersFile = "AS-Assignment/data/online_orders.csv";
         long onlineInterval = 3000; // 3秒一个在线订单
         this.onlineProducer = new OnlineOrderProducerThread(queue, menuMap, onlineOrdersFile, onlineInterval);
     }

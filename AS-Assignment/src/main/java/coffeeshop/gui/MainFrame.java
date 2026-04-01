@@ -54,6 +54,8 @@ public class MainFrame extends JFrame implements QueueObserver, ServerObserver {
         SimulationController controller = new SimulationController(simulationManager, simulationService);
         controller.registerObservers(this, staffPanel);
         controlPanel.setStartAction(controller::start);
+        controlPanel.setAddStaffAction(simulationManager::addServingStaff);
+        controlPanel.setRemoveStaffAction(simulationManager::removeOneIdleStaff);
 
 
     }
