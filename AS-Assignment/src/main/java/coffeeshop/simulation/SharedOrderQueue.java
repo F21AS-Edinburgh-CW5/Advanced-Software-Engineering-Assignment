@@ -1,39 +1,27 @@
 package coffeeshop.simulation;
 
 import coffeeshop.model.CustomerOrder;
+import coffeeshop.model.OnlineOrder;
 import coffeeshop.service.SimulationService;
-
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.function.BooleanSupplier;
-//shared order queue for producer and staff workers(3)
+import java.util.*;
 
-//order queue: used for transmitting orders between producers and employees
 public class SharedOrderQueue {
 
-    //the linked list for storing orders
     private final LinkedList<CustomerOrder> orders = new LinkedList<>();
-
-    //check whether there will be no more new orders entering the queue
+    private final PriorityQueue<OnlineOrder> onlineOrders = new PriorityQueue<>(
+        Comparator.comparingInt(OnlineOrder::getPriority)
+    );
     private boolean closed = false;
-
-    //used for informing observers after queue has changes
     private SimulationService simulationService = null;
 
-    /**
-     * connect queue 
-     */
     public synchronized void setSimulationService(SimulationService simulationService) {
         this.simulationService = simulationService;
     }
 
-    /**
-     *add orders to the queue
-     */
     public void add(CustomerOrder newOrder) {
         if (newOrder == null) {
-            throw new IllegalArgumentException("Error:Orders can not be null.");
+            throw new IllegalArgumentException("Error: Orders cannot be null.");
         }
 
         List<CustomerOrder> snapshot;
@@ -48,6 +36,23 @@ public class SharedOrderQueue {
             notifyAll();
         }
 
+        publishQueueChanged(serviceRef, snapshot, finished);
+    }
+
+    public void addOnlineOrder(OnlineOrder order) {
+        if (order == null) {
+            throw new IllegalArgumentException("Order cannot be null");
+        }
+        List<CustomerOrder> snapshot;
+        boolean finished;
+        SimulationService serviceRef;
+        synchronized (this) {
+            onlineOrders.add(order);
+            snapshot = new ArrayList<>(orders);
+            finished = closed;
+            serviceRef = simulationService;
+            notifyAll();
+        }
         publishQueueChanged(serviceRef, snapshot, finished);
     }
 
@@ -71,10 +76,6 @@ public class SharedOrderQueue {
         publishQueueChanged(serviceRef, snapshot, finished);
     }
 
-    /**
-     * get a order from the queue
-     * @return orders getted / Null
-     */
     public CustomerOrder take() {
         return take(() -> false);
     }
@@ -91,17 +92,18 @@ public class SharedOrderQueue {
                     nextOrder = null;
                     break;
                 }
-
+                if (!onlineOrders.isEmpty()) {
+                    nextOrder = onlineOrders.poll();
+                    break;
+                }
                 if (!orders.isEmpty()) {
                     nextOrder = orders.removeFirst();
                     break;
                 }
-
                 if (closed) {
                     nextOrder = null;
                     break;
                 }
-
                 try {
                     wait();
                 } catch (InterruptedException ex) {
@@ -119,9 +121,7 @@ public class SharedOrderQueue {
         publishQueueChanged(serviceRef, snapshot, finished);
         return nextOrder;
     }
-    
-    //notify all waiting threads
-    //information:No new orders will be entered from now time.
+
     public void markProducerDone() {
         List<CustomerOrder> snapshot;
         SimulationService serviceRef;
@@ -139,8 +139,7 @@ public class SharedOrderQueue {
     public synchronized void signalStateChange() {
         notifyAll();
     }
-    
-    // after leaving synchronized block,then notify observers
+
     private void publishQueueChanged(SimulationService serviceRef,
                                      List<CustomerOrder> snapshot,
                                      boolean finished) {
@@ -150,22 +149,22 @@ public class SharedOrderQueue {
         }
     }
 
-    //check whether the queue is empty
     public synchronized boolean isEmpty() {
-        return orders.isEmpty();
+        return orders.isEmpty() && onlineOrders.isEmpty();
     }
 
-    //get numbers of the orders(queue size)
     public synchronized int size() {
-        return orders.size();
+        return orders.size() + onlineOrders.size();
     }
 
-    //check producer thread (whether is ended)
     public synchronized boolean isProducerDone() {
         return closed;
     }
 
     public synchronized List<CustomerOrder> getQueueSnapshot() {
-        return new ArrayList<>(orders);
+        List<CustomerOrder> all = new ArrayList<>();
+        all.addAll(onlineOrders);
+        all.addAll(orders);
+        return all;
     }
 }
