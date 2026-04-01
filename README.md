@@ -5,6 +5,9 @@
 **Group:** Edinburgh CW 5
 
 This project extends the Stage 1 coffee shop ordering system with a multithreaded Stage 2 simulation.
+## Run the Project
+
+> **Important:** Please clone this repository using `git clone`. Do not download and extract the ZIP archive, as the working directory configuration will not resolve correctly.
 
 ## Features
 
@@ -101,6 +104,7 @@ AS-Assignment/
 ├── pom.xml
 └── README.md
 ```
+
 
 ## Entry Points
 
