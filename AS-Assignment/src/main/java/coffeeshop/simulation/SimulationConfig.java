@@ -3,7 +3,7 @@ package coffeeshop.simulation;
 import coffeeshop.logging.EventLogger;
 
 public class SimulationConfig {
-    // volatile 保证多线程可见性
+    // volatile  ensures thread-safety in multi-threading.
     private static volatile double speedMultiplier = 1.0;
 
     public static double getSpeedMultiplier() {

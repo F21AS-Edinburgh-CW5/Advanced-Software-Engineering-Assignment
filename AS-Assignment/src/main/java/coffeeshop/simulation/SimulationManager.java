@@ -24,8 +24,8 @@ public class SimulationManager {
     private int nextStaffNumber;
     private volatile boolean simulationStarted;
     private volatile boolean simulationFinished;
-    
-    // 控制台版本构造函数（不启用在线订单）
+
+    // Console version constructor (without enabling online orders)
     public SimulationManager(SharedOrderQueue queue,
             ProducerThread producer,
             int workerCount) {
@@ -33,7 +33,7 @@ this.queue = queue;
 this.producer = producer;
 this.workers = new ArrayList<>();
 this.staffModels = new ArrayList<>();
-this.reportStaffModels = new ArrayList<>();   // 添加这一行，解决 final 未初始化错误
+this.reportStaffModels = new ArrayList<>();   // Add this line to resolve the "final" variable not initialized error
 this.simulationService = null;
 
 for (int i = 0; i < workerCount; i++) {
@@ -50,7 +50,7 @@ this.simulationFinished = false;
 this.onlineProducer = null;
 }
 
-    // GUI 版本构造函数（启用在线订单）
+    // GUI version constructor (enabling online orders)
     public SimulationManager(SharedOrderQueue queue,
                              ProducerThread producer,
                              List<ServingStaff> staffModels,
@@ -77,10 +77,10 @@ this.onlineProducer = null;
                     new ServingStaffWorker(staffModel, queue, simulationService);
             workers.add(worker);
         }
-        
-        // 初始化在线订单生产者（文件路径可配置）
+
+        // Initialize the online order producer (file path can be configured)
         String onlineOrdersFile = "AS-Assignment/data/online_orders.csv";
-        long onlineInterval = 3000; // 3秒一个在线订单
+        long onlineInterval = 3000; // One online order every 3 seconds
         this.onlineProducer = new OnlineOrderProducerThread(queue, menuMap, onlineOrdersFile, onlineInterval);
     }
 

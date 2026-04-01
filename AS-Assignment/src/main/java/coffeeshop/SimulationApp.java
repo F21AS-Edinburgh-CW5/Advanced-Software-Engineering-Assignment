@@ -11,7 +11,7 @@ import java.util.Map;
 public class SimulationApp {
 
     public static void main(String[] args) {
-        // 1. 加载菜单
+
         String menuFile = "AS-Assignment/data/menu.csv";
         String ordersFile = "AS-Assignment/data/orders.csv";
 
@@ -23,18 +23,18 @@ public class SimulationApp {
         }
         System.out.println("Loaded " + menuMap.size() + " menu items.");
 
-        // 2. 创建共享队列
+
         SharedOrderQueue queue = new SharedOrderQueue();
 
-        // 3. 创建生产者线程（间隔 2000 ms）
+
         long intervalMs = 2000;
         ProducerThread producer = new ProducerThread(queue, menuMap, ordersFile, intervalMs);
 
-        // 4. 创建仿真管理器（2个服务员）
+
         int workerCount = 2;
         SimulationManager manager = new SimulationManager(queue, producer, workerCount);
 
-        // 5. 启动并等待完成
+
         try {
             manager.startSimulation();
             manager.awaitCompletion();
