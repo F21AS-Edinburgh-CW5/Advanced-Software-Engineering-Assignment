@@ -6,6 +6,8 @@ import coffeeshop.service.SimulationService;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.BooleanSupplier;
+//shared order queue for producer and staff workers(3)
 
 //order queue: used for transmitting orders between producers and employees
 public class SharedOrderQueue {
@@ -40,8 +42,27 @@ public class SharedOrderQueue {
 
         synchronized (this) {
             orders.addLast(newOrder);
-            snapshot = new ArrayList<>();
-            snapshot.addAll(orders);
+            snapshot = new ArrayList<>(orders);
+            finished = closed;
+            serviceRef = simulationService;
+            notifyAll();
+        }
+
+        publishQueueChanged(serviceRef, snapshot, finished);
+    }
+
+    public void addToFront(CustomerOrder order) {
+        if (order == null) {
+            throw new IllegalArgumentException("Error: Orders cannot be null.");
+        }
+
+        List<CustomerOrder> snapshot;
+        boolean finished;
+        SimulationService serviceRef;
+
+        synchronized (this) {
+            orders.addFirst(order);
+            snapshot = new ArrayList<>(orders);
             finished = closed;
             serviceRef = simulationService;
             notifyAll();
@@ -55,6 +76,10 @@ public class SharedOrderQueue {
      * @return orders getted / Null
      */
     public CustomerOrder take() {
+        return take(() -> false);
+    }
+
+    public CustomerOrder take(BooleanSupplier stopRequested) {
         CustomerOrder nextOrder;
         List<CustomerOrder> snapshot;
         boolean finished;
@@ -62,6 +87,11 @@ public class SharedOrderQueue {
 
         synchronized (this) {
             for (;;) {
+                if (stopRequested != null && stopRequested.getAsBoolean()) {
+                    nextOrder = null;
+                    break;
+                }
+
                 if (!orders.isEmpty()) {
                     nextOrder = orders.removeFirst();
                     break;
@@ -81,8 +111,7 @@ public class SharedOrderQueue {
                 }
             }
 
-            snapshot = new ArrayList<>();
-            snapshot.addAll(orders);
+            snapshot = new ArrayList<>(orders);
             finished = closed;
             serviceRef = simulationService;
         }
@@ -90,7 +119,7 @@ public class SharedOrderQueue {
         publishQueueChanged(serviceRef, snapshot, finished);
         return nextOrder;
     }
-
+    
     //notify all waiting threads
     //information:No new orders will be entered from now time.
     public void markProducerDone() {
@@ -99,8 +128,7 @@ public class SharedOrderQueue {
 
         synchronized (this) {
             closed = true;
-            snapshot = new ArrayList<>();
-            snapshot.addAll(orders);
+            snapshot = new ArrayList<>(orders);
             serviceRef = simulationService;
             notifyAll();
         }
@@ -108,6 +136,10 @@ public class SharedOrderQueue {
         publishQueueChanged(serviceRef, snapshot, true);
     }
 
+    public synchronized void signalStateChange() {
+        notifyAll();
+    }
+    
     // after leaving synchronized block,then notify observers
     private void publishQueueChanged(SimulationService serviceRef,
                                      List<CustomerOrder> snapshot,
@@ -134,8 +166,6 @@ public class SharedOrderQueue {
     }
 
     public synchronized List<CustomerOrder> getQueueSnapshot() {
-        List<CustomerOrder> snapshot = new ArrayList<>();
-        snapshot.addAll(orders);
-        return snapshot;
+        return new ArrayList<>(orders);
     }
 }
