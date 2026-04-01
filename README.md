@@ -21,8 +21,12 @@ This project extends the Stage 1 coffee shop ordering system with a multithreade
 * Simulate internal order processing with a producer–consumer model
 * Push grouped customer orders into a shared queue
 * Process orders concurrently with multiple serving staff workers
-* Log simulation events
-* Provide the base structure for later Observer / MVC style extensions
+* Log simulation events to `simulation_log.txt`
+* Real-time Swing GUI showing queue state and staff status via Observer / MVC pattern
+* Speed control slider (0.25× – 4×) to adjust simulation pace at runtime
+* Dynamic staff addition and removal during a live simulation
+* Online order priority queue: online orders are processed before walk-in orders
+* Staff status colour coding: green (PROCESSING), yellow (WAITING), grey (IDLE)
 
 ## Project Layout
 
@@ -30,7 +34,8 @@ This project extends the Stage 1 coffee shop ordering system with a multithreade
 AS-Assignment/
 ├── data/
 │   ├── menu.csv
-│   └── orders.csv
+│   ├── orders.csv
+│   └── online_orders.csv
 │
 ├── src/main/java/coffeeshop/
 │   ├── App.java
@@ -45,7 +50,11 @@ AS-Assignment/
 │   │   └── MenuItemView.java
 │   │
 │   ├── gui/
-│   │   └── MainFrame.java
+│   │   ├── ControlPanel.java
+│   │   ├── MainFrame.java
+│   │   ├── QueuePanel.java
+│   │   ├── SimulationController.java
+│   │   └── StaffPanel.java
 │   │
 │   ├── loader/
 │   │   ├── MenuLoader.java
@@ -57,6 +66,7 @@ AS-Assignment/
 │   ├── model/
 │   │   ├── CustomerOrder.java
 │   │   ├── MenuItem.java
+│   │   ├── OnlineOrder.java
 │   │   ├── OrderRecord.java
 │   │   ├── ServingStaff.java
 │   │   ├── SimulationSnapshot.java
@@ -68,12 +78,17 @@ AS-Assignment/
 │   ├── service/
 │   │   ├── CoffeeShopServiceImpl.java
 │   │   ├── DemoCoffeeShopService.java
-│   │   └── ProcessingTimeService.java
+│   │   ├── ProcessingTimeService.java
+│   │   ├── QueueObserver.java
+│   │   ├── ServerObserver.java
+│   │   └── SimulationService.java
 │   │
 │   ├── simulation/
+│   │   ├── OnlineOrderProducerThread.java
 │   │   ├── ProducerThread.java
 │   │   ├── ServingStaffWorker.java
 │   │   ├── SharedOrderQueue.java
+│   │   ├── SimulationConfig.java
 │   │   └── SimulationManager.java
 │   │
 │   └── util/
@@ -82,13 +97,14 @@ AS-Assignment/
 ├── src/test/java/coffeeshop/
 │   └── ReportGeneratorTest.java
 │
+├── AS-Assignment.jar
 ├── pom.xml
 └── README.md
 ```
 
 ## Entry Points
 
-### GUI
+### GUI Simulation (Stage 2)
 
 Run:
 
@@ -96,9 +112,9 @@ Run:
 coffeeshop.App
 ```
 
-This launches the Stage 1 ordering interface.
+This launches the Stage 2 multithreaded simulation with the full Swing GUI.
 
-### Console Simulation
+### Console Simulation;
 
 Run:
 
@@ -106,7 +122,15 @@ Run:
 coffeeshop.SimulationApp
 ```
 
-This launches the Stage 2 multithreaded simulation.
+This launches a console-only version of the Stage 2 simulation (no GUI).
+
+### JAR
+
+```bash
+java -jar AS-Assignment.jar
+```
+
+Requires the `AS-Assignment/data/` folder to be present in the same directory as the JAR.
 
 ## Run the Project
 
@@ -173,23 +197,36 @@ The Stage 2 simulation uses a producer–consumer design.
 ### Main Components
 
 **SharedOrderQueue**
-Stores customer orders waiting to be processed using `synchronized`, `wait()`, and `notifyAll()`.
+Stores customer orders waiting to be processed using `synchronized`, `wait()`, and `notifyAll()`. Also holds a separate `PriorityQueue` for online orders.
 
 **ProducerThread**
-Loads and groups order records, then adds them to the queue.
+Loads and groups order records, then adds them to the queue at timed intervals.
+
+**OnlineOrderProducerThread**
+Reads online orders from `data/online_orders.csv` and submits them to the priority queue inside `SharedOrderQueue`.
 
 **ServingStaffWorker**
-Takes orders from the queue and processes them.
+Takes orders from the queue and processes them. Checks the online queue first. Supports clean shutdown via a `volatile boolean shouldStop` flag.
 
 **SimulationManager**
-Starts the simulation, creates workers, and handles shutdown.
+Starts the simulation, creates workers, supports dynamic staff addition and removal, and handles shutdown.
+
+**SimulationService**
+Maintains observer lists (`QueueObserver`, `ServerObserver`) and distributes `SimulationSnapshot` updates to the GUI.
+
+**SimulationController**
+MVC Controller: connects GUI Start/Stop actions to `SimulationManager` and registers GUI panels as observers.
+
+**SimulationConfig**
+Holds `volatile double speedMultiplier` (range 0.25–4.0). All `Thread.sleep()` durations are divided by this value at runtime.
 
 **EventLogger**
-Records simulation events. Implemented as a Singleton.
+Records simulation events. Implemented as a Singleton using the Bill Pugh static inner holder pattern. Writes to `simulation_log.txt` on exit.
 
 **Supporting Models**
 
 * `CustomerOrder`
+* `OnlineOrder`
 * `ServingStaff`
 * `SimulationSnapshot`
 * `StaffStatus`
@@ -199,10 +236,11 @@ Records simulation events. Implemented as a Singleton.
 1. Load menu data
 2. Load order records
 3. Group records into customer orders
-4. Add orders to the shared queue
-5. Start multiple workers
-6. Process orders concurrently
-7. Log events and exit cleanly
+4. Add orders to the shared queue at timed intervals
+5. Start multiple serving staff workers
+6. Process orders concurrently; online orders take priority
+7. GUI updates in real time via Observer pattern on the EDT
+8. Log events and write report on exit
 
 ## Data Files
 
@@ -210,8 +248,9 @@ The project expects:
 
 * `data/menu.csv`
 * `data/orders.csv`
+* `data/online_orders.csv`
 
-These are used by both the GUI and the simulation.
+These must be present relative to the working directory when running from IntelliJ, or relative to the JAR location when running the JAR.
 
 ## Tech Stack
 
@@ -223,14 +262,7 @@ These are used by both the GUI and the simulation.
 
 ## Known Notes
 
-The project was developed iteratively. Depending on the current branch state, the Stage 2 simulation may still need final interface alignment.
-
-Known integration points include:
-
-* package declaration issue in `SimulationApp.java`
-* constructor mismatch between `SimulationManager` and `ServingStaffWorker`
-* `Runnable` vs `Thread` inconsistency
-* static vs instance use of `OrderLoader.load(...)`
+The remove staff function (Ext-2) does not always take effect immediately. A stop request is only honoured when the targeted worker is idle; a worker currently processing an order will not respond until it finishes. This timing issue has not been fully resolved.
 
 ## Troubleshooting
 
@@ -239,8 +271,8 @@ Known integration points include:
 | `data/menu.csv` or `data/orders.csv` cannot be found | Check the run configuration working directory and the relative file paths     |
 | `coffeeshop.api cannot be resolved`                  | Make sure only `src/main/java` and `src/test/java` are marked as source roots |
 | JUnit annotations cannot be resolved                 | Reimport the Maven project or add JUnit 5 correctly                           |
-| `SimulationApp` fails to run                         | Check the simulation classes against the known integration notes              |
 | GUI opens but no data loads                          | Verify that the CSV paths match the working directory                         |
+| JAR cannot find data files                           | Ensure `AS-Assignment/data/` folder is in the same directory as the JAR       |
 
 ## Notes
 
@@ -249,4 +281,4 @@ This repository contains both:
 * the original Stage 1 GUI ordering workflow
 * the Stage 2 multithreaded simulation extension
 
-The first Stage 2 iteration focused on the minimum console-based threaded architecture, with later expansion toward a fuller application structure.
+The Stage 2 development followed three agile iterations: Iteration 1 established the console-based producer–consumer skeleton; Iteration 2 added the Swing GUI, Observer pattern, and MVC structure; Iteration 3 delivered the four runtime extensions and final code polish.
