@@ -67,6 +67,8 @@ public class StaffPanel extends JPanel implements ServerObserver {
             return;
         }
 
+        List<String> visibleStaffIds = new ArrayList<>();
+        
         for (ServingStaff staff : staffList) {
             if (staff == null) {
                 continue;
@@ -76,14 +78,26 @@ public class StaffPanel extends JPanel implements ServerObserver {
             if (staffId.isEmpty()) {
                 continue;
             }
-
+            visibleStaffIds.add(staffId);
             if (!columnsById.containsKey(staffId)) {
                 StaffColumn column = new StaffColumn(staffId);
                 columnsById.put(staffId, column);
                 add(column);
             }
         }
-
+        List<String> idsToRemove = new ArrayList<>();
+        for (String existingId : columnsById.keySet()) {
+            if (!visibleStaffIds.contains(existingId)) {
+                idsToRemove.add(existingId);
+            }
+        }
+        for (String id : idsToRemove) {
+            StaffColumn column = columnsById.remove(id);
+            if (column != null) {
+                remove(column);
+            }
+        }
+    
         for (ServingStaff staff : staffList) {
             if (staff == null) {
                 continue;
