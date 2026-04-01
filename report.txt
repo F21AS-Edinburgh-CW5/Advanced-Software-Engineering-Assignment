@@ -1,0 +1,67 @@
+=============================================================
+              COFFEE SHOP SUMMARY REPORT
+=============================================================
+
+-------------------------------------------------------------
+  MENU ITEMS
+-------------------------------------------------------------
+Item ID      Description              Category        Price
+-------      -----------              --------        -----
+FOOD-001     Croissant                Food         £   2.50
+FOOD-002     Blueberry Muffin         Food         £   3.00
+FOOD-003     Chocolate Brownie        Food         £   3.50
+OTH-005      Yogurt Parfait           Other        £   4.00
+FOOD-004     Ham Sandwich             Food         £   4.50
+OTH-004      Fruit Salad              Other        £   3.50
+FOOD-005     Chicken Wrap             Food         £   5.00
+OTH-003      Cookie                   Other        £   1.80
+FOOD-006     Caesar Salad             Food         £   5.50
+OTH-002      Orange Juice             Other        £   2.80
+FOOD-007     Scone with Jam           Food         £   2.80
+OTH-001      Bottle of Water          Other        £   1.50
+BEV-004      Latte                    Beverage     £   3.80
+BEV-005      Mocha                    Beverage     £   4.20
+BEV-002      Americano                Beverage     £   3.00
+BEV-003      Cappuccino               Beverage     £   3.50
+BEV-008      Green Tea                Beverage     £   2.80
+BEV-006      Flat White               Beverage     £   3.60
+BEV-007      Hot Chocolate            Beverage     £   3.80
+BEV-001      Espresso                 Beverage     £   2.50
+
+-------------------------------------------------------------
+  ORDER SUMMARY
+-------------------------------------------------------------
+Item ID      Description               Times Ordered
+-------      -----------               -------------
+FOOD-001     Croissant                             2
+FOOD-002     Blueberry Muffin                      1
+FOOD-003     Chocolate Brownie                     2
+OTH-005      Yogurt Parfait                        0
+FOOD-004     Ham Sandwich                          1
+OTH-004      Fruit Salad                           0
+FOOD-005     Chicken Wrap                          1
+OTH-003      Cookie                                0
+FOOD-006     Caesar Salad                          0
+OTH-002      Orange Juice                          1
+FOOD-007     Scone with Jam                        0
+OTH-001      Bottle of Water                       1
+BEV-004      Latte                                 1
+BEV-005      Mocha                                 1
+BEV-002      Americano                             1
+BEV-003      Cappuccino                            1
+BEV-008      Green Tea                             0
+BEV-006      Flat White                            1
+BEV-007      Hot Chocolate                         1
+BEV-001      Espresso                              2
+
+Total individual items ordered: 17
+Total orders processed:         8
+
+-------------------------------------------------------------
+  REVENUE
+-------------------------------------------------------------
+Total Revenue (after discounts): £52.45
+
+=============================================================
+                    END OF REPORT
+=============================================================

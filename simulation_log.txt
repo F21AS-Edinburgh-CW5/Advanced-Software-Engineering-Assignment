@@ -1,0 +1,44 @@
+[2026-04-01 12:30:53.175] Information: add a staff member  Server-3
+[2026-04-01 12:30:53.897] Information: add a staff member  Server-4
+[2026-04-01 12:30:54.520] Information: add a staff member  Server-5
+[2026-04-01 12:30:56.452] Information: need to removal a staff member: Server-5
+[2026-04-01 12:30:57.013] Information: need to removal a staff member: Server-4
+[2026-04-01 12:30:58.168] Information: need to removal a staff member: Server-3
+[2026-04-01 12:30:58.597] Information: need to removal a staff member: Server-2
+[2026-04-01 12:30:59.497] Information: add a staff member  Server-6
+[2026-04-01 12:30:59.968] Information: add a staff member  Server-7
+[2026-04-01 12:31:00.329] Information: add a staff member  Server-8
+[2026-04-01 12:31:00.718] Information: add a staff member  Server-9
+[2026-04-01 12:31:02.680] [OnlineProducer] Starting...
+[2026-04-01 12:31:02.680] [OnlineProducer] Error reading file: AS-Assignment\data\online_orders.csv (系统找不到指定的文件。)
+[2026-04-01 12:31:02.680] [OnlineProducer] Finished.
+[2026-04-01 12:31:02.680] [SERVER-Server-9] Information: start worker
+[2026-04-01 12:31:02.680] [SERVER-Server-1] Information: start worker
+[2026-04-01 12:31:02.680] [SERVER-Server-6] Information: start worker
+[2026-04-01 12:31:02.680] [SERVER-Server-7] Information: start worker
+[2026-04-01 12:31:02.680] [SERVER-Server-8] Information: start worker
+[2026-04-01 12:31:04.696] [SERVER-Server-8] Started processing order for CUST008 (2 item(s))
+[2026-04-01 12:31:06.695] [SERVER-Server-7] Started processing order for CUST007 (2 item(s))
+[2026-04-01 12:31:08.698] [SERVER-Server-1] Started processing order for CUST004 (2 item(s))
+[2026-04-01 12:31:10.699] [SERVER-Server-6] Started processing order for CUST003 (3 item(s))
+[2026-04-01 12:31:12.700] [SERVER-Server-9] Started processing order for CUST006 (2 item(s))
+[2026-04-01 12:31:12.771] [SERVER-Server-7] Finished order for CUST007
+[2026-04-01 12:31:14.703] [SERVER-Server-7] Started processing order for CUST005 (1 item(s))
+[2026-04-01 12:31:17.083] [SERVER-Server-7] Finished order for CUST005
+[2026-04-01 12:31:17.084] [SERVER-Server-7] Started processing order for CUST002 (2 item(s))
+[2026-04-01 12:31:19.071] [SERVER-Server-8] Finished order for CUST008
+[2026-04-01 12:31:19.071] [SERVER-Server-8] Started processing order for CUST001 (3 item(s))
+[2026-04-01 12:31:20.832] [SERVER-Server-6] Finished order for CUST003
+[2026-04-01 12:31:20.833] [SERVER-Server-6] No more orders. Exiting. Total processed: 1
+[2026-04-01 12:31:20.869] [SERVER-Server-1] Finished order for CUST004
+[2026-04-01 12:31:20.869] [SERVER-Server-1] No more orders. Exiting. Total processed: 1
+[2026-04-01 12:31:24.129] [SERVER-Server-9] Finished order for CUST006
+[2026-04-01 12:31:24.130] [SERVER-Server-9] No more orders. Exiting. Total processed: 1
+[2026-04-01 12:31:28.575] [SERVER-Server-7] Finished order for CUST002
+[2026-04-01 12:31:28.575] [SERVER-Server-7] No more orders. Exiting. Total processed: 3
+[2026-04-01 12:31:36.453] [SERVER-Server-8] Finished order for CUST001
+[2026-04-01 12:31:36.453] [SERVER-Server-8] No more orders. Exiting. Total processed: 2
+[2026-04-01 12:31:45.423] Speed multiplier set to 2.3333333333333335
+[2026-04-01 12:31:47.775] Speed multiplier set to 1.0833333333333335
+[2026-04-01 12:31:48.512] Speed multiplier set to 1.5
+[2026-04-01 12:31:49.577] Speed multiplier set to 2.3333333333333335
