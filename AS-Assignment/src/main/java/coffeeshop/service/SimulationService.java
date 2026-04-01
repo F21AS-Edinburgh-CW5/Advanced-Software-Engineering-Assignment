@@ -4,11 +4,12 @@ import coffeeshop.model.ServingStaff;
 import coffeeshop.model.SimulationSnapshot;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Iterator;
 //Iteration2 SimulationService
 
 //Function:keep order list,build snapshots,and inform GUI observers.
 
-
+//Iteration3 Simulation GUI central model.
 public class SimulationService {
 
     private final List<QueueObserver> queueObservers = new ArrayList<>();
@@ -43,6 +44,38 @@ public class SimulationService {
         this.finished = finished;
     }
 
+    public void addStaff(ServingStaff staff) {
+        if (staff == null) {
+            return;
+        }
+        synchronized (staffList) {
+            staffList.add(staff);
+        }
+    }
+
+    public boolean removeStaffById(String staffId) {
+        if (staffId == null) {
+            return false;
+        }
+        synchronized (staffList) {
+            Iterator<ServingStaff> iterator = staffList.iterator();
+            while (iterator.hasNext()) {
+                ServingStaff staff = iterator.next();
+                if (staffId.equals(staff.getStaffId())) {
+                    iterator.remove();
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public int getStaffCount() {
+        synchronized (staffList) {
+            return staffList.size();
+        }
+    }
+    
     public void notifyQueueObservers(List<CustomerOrder> queueSnapshot) {
         SimulationSnapshot snapshot = createSnapshot(queueSnapshot);
         List<QueueObserver> observers = getQueueObserverCopy();
@@ -61,13 +94,26 @@ public class SimulationService {
         }
     }
 
+    public void notifyAllObservers(List<CustomerOrder> queueSnapshot) {
+        SimulationSnapshot snapshot = createSnapshot(queueSnapshot);
+
+        for (QueueObserver observer : getQueueObserverCopy()) {
+            observer.onQueueChanged(snapshot);
+        }
+        for (ServerObserver observer : getServerObserverCopy()) {
+            observer.onServerStateChanged(snapshot);
+        }
+    }
+    
     private SimulationSnapshot createSnapshot(List<CustomerOrder> queueSnapshot) {
         List<CustomerOrder> queueCopy = copyQueue(queueSnapshot);
         List<ServingStaff> staffCopy;
         boolean finishedCopy;
 
-        synchronized (this) {
+        synchronized (staffList) {
             staffCopy = copyStaffList();
+        }
+        synchronized (this) {
             finishedCopy = finished;
         }
 
@@ -86,32 +132,20 @@ public class SimulationService {
 
     
     private synchronized List<QueueObserver> getQueueObserverCopy() {
-        List<QueueObserver> copy = new ArrayList<>();
-        copy.addAll(queueObservers);
-        return copy;
+        return new ArrayList<>(queueObservers);
     }
 
     
     private synchronized List<ServerObserver> getServerObserverCopy() {
-        List<ServerObserver> copy = new ArrayList<>();
-        copy.addAll(serverObservers);
-        return copy;
+        return new ArrayList<>(serverObservers);
     }
 
     
     private List<ServingStaff> copyStaffList() {
         List<ServingStaff> result = new ArrayList<>();
 
-        for (ServingStaff oldStaff : staffList) {
-            ServingStaff newStaff = new ServingStaff(oldStaff.getStaffId());
-            newStaff.setStatus(oldStaff.getStatus());
-            newStaff.setCurrentOrder(oldStaff.getCurrentOrder());
-
-            for (int i = 0; i < oldStaff.getProcessedCount(); i++) {
-                newStaff.incrementProcessedCount();
-            }
-
-            result.add(newStaff);
+        for (ServingStaff staff : staffList) {
+            result.add(staff.copy());
         }
 
         return result;
